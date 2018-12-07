@@ -6,6 +6,13 @@
 #define NUMBUFFERS 4
 #define WAVE_FILE_NAME "sample.wav"
 
+// RIFFチャンクを格納する為の構造体
+struct RIFFChunk {
+    char          tag[4];
+    unsigned long size;
+    char          format[4];
+};
+
 int main(void) {
     // OpenALを開く
     ALCdevice* device = alcOpenDevice(nullptr);
@@ -28,16 +35,15 @@ int main(void) {
 
     // ファイルを開くのに成功
     if (fp) {
+        
 
+        fclose(fp);
     }
     // ファイルを開くことに失敗
     else {
 
     }
 
-    if (fp) {
-        fclose(fp);
-    }
     // OpenALを閉じる
     alcMakeContextCurrent(nullptr);
     alcDestroyContext(context);
