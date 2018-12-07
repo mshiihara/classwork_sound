@@ -2,8 +2,11 @@
 #include <al.h>
 #include <alc.h>
 
+// ストリームに使用するバッファの数
+#define NUMBUFFERS 4
+
 int main(void) {
-    // OpenALを開く
+    // OpenAL Open
     ALCdevice* device = alcOpenDevice(nullptr);
     ALCcontext* context = nullptr;
     if (device) {
@@ -11,7 +14,15 @@ int main(void) {
         alcMakeContextCurrent(context);
     }
 
-    // OpenALを閉じる
+    // Create Buffer
+    ALuint buffers[NUMBUFFERS];
+    alGenBuffers( NUMBUFFERS, buffers);
+
+    // Create Source
+    ALuint source;
+    alGenSources(1, &source);
+
+    // OpenAL Close
     alcMakeContextCurrent(nullptr);
     alcDestroyContext(context);
     alcCloseDevice(device);
