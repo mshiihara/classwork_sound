@@ -44,6 +44,7 @@ struct WAVEFILEINFO {
     WAVEFILETYPE         wfType; // PCMなのかEXTENSIBLEなのかを区別する為の情報
     WAVEFORMATEXTENSIBLE wfEXT;  // フォーマット情報
     unsigned long waveSize;      // waveデータの大きさ
+    unsigned long waveChunkPos;  // waveチャンクのファイルポインタ
 };
 
 
@@ -115,6 +116,10 @@ int main(void) {
                 }
                 else if (_strnicmp(riffChunk.tag, "data", 4) == 0) {
                     printf("dataチャンク発見\n");
+                    //waveデータのサイズを取得
+                    waveInfo.waveSize = riffChunk.size;
+                    //後でwaveデータを読み込む際のセーブポイント
+                    waveInfo.waveChunkPos = ftell(fp);
                 }
                 else {
                     // 次のチャンクへ移動
