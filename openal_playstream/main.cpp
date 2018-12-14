@@ -8,10 +8,15 @@
 #define WAVE_FILE_NAME "sample.wav"
 
 // RIFFチャンクを格納する為の構造体
-struct RIFFChunk {
+struct RIFFHeader {
     char          tag[4];
     unsigned long size;
     char          format[4];
+};
+
+struct RIFFChunk{
+	char          tag[4];
+    unsigned long size;
 };
 
 int main(void) {
@@ -34,11 +39,11 @@ int main(void) {
     FILE* fp = nullptr;
     fopen_s(&fp, WAVE_FILE_NAME, "rb");
 
-    RIFFChunk riffChunk;
+    RIFFHeader riffChunk;
     // ファイルを開くのに成功
     if (fp) {
         // ヘッダを読み取り
-        fread(&riffChunk, 1, sizeof(RIFFChunk), fp);
+        fread(&riffChunk, 1, sizeof(RIFFHeader), fp);
         // 読み取ったヘッダがRIFFであるか確認
         if (_strnicmp(riffChunk.tag, "RIFF", 4) == 0) {
             printf("RIFFヘッダを読み取りました\n");
