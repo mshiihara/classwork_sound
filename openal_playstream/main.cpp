@@ -15,7 +15,7 @@ struct RIFFHeader {
 };
 
 struct RIFFChunk{
-	char          tag[4];
+    char          tag[4];
     unsigned long size;
 };
 
@@ -39,14 +39,25 @@ int main(void) {
     FILE* fp = nullptr;
     fopen_s(&fp, WAVE_FILE_NAME, "rb");
 
-    RIFFHeader riffChunk;
+    RIFFHeader riffHeader;
+    RIFFChunk  riffChunk;
     // ファイルを開くのに成功
     if (fp) {
         // ヘッダを読み取り
-        fread(&riffChunk, 1, sizeof(RIFFHeader), fp);
+        fread(&riffHeader, 1, sizeof(RIFFHeader), fp);
         // 読み取ったヘッダがRIFFであるか確認
-        if (_strnicmp(riffChunk.tag, "RIFF", 4) == 0) {
+        if (_strnicmp(riffHeader.tag, "RIFF", 4) == 0) {
             printf("RIFFヘッダを読み取りました\n");
+            while (fread(&riffChunk, 1, sizeof(RIFFChunk), fp) == sizeof(RIFFChunk)) {
+                // 読み取ったチャンクがfmt であるか確認
+                if (_strnicmp(riffChunk.tag, "fmt ", 4) == 0) {
+
+                }
+                else {
+                    // 次のチャンクへ移動
+                    fseek(fp, riffChunk.size, SEEK_CUR);
+                }
+            }
         }
         else {
             printf("ヘッダがRIFFではありませんでした\n");
