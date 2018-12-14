@@ -1,3 +1,4 @@
+#include <Windows.h>
 #include <stdio.h>
 #include <al.h>
 #include <alc.h>
@@ -97,12 +98,18 @@ int main(void) {
                             waveFmt.guidSubFormat);
                         // 一般的なのwaveファイルか？
                         if (waveFmt.usFormatTag == WAVE_FORMAT_PCM) {
-
+                            waveInfo.wfType = WF_EX;
+                            memcpy(&waveInfo.wfEXT.Format, &waveFmt, sizeof(PCMWAVEFORMAT));
                         }
                         // 3チャンネル以上の特別なwaveファイルか？
                         else if (waveFmt.usFormatTag == WAVE_FORMAT_EXTENSIBLE) {
-
+                            waveInfo.wfType = WF_EXT;
+                            memcpy(&waveInfo.wfEXT, &waveFmt, sizeof(WAVEFORMATEXTENSIBLE));
                         }
+                    }
+                    else {
+                        // 次のチャンクへ移動
+                        fseek(fp, riffChunk.size, SEEK_CUR);
                     }
                 }
                 else {
