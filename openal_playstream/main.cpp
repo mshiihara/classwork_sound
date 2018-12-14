@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <al.h>
 #include <alc.h>
+#include <string.h>
 
 // ストリームに使用するバッファの数
 #define NUMBUFFERS 4
@@ -36,9 +37,15 @@ int main(void) {
     RIFFChunk riffChunk;
     // ファイルを開くのに成功
     if (fp) {
-        // Read Wave file header
-		fread(&riffChunk, 1, sizeof(RIFFChunk), fp);
-
+        // ヘッダを読み取り
+        fread(&riffChunk, 1, sizeof(RIFFChunk), fp);
+        // 読み取ったヘッダがRIFFであるか確認
+        if (_strnicmp(riffChunk.tag, "RIFF", 4) == 0) {
+            printf("RIFFヘッダを読み取りました\n");
+        }
+        else {
+            printf("ヘッダがRIFFではありませんでした\n");
+        }
         fclose(fp);
     }
     // ファイルを開くことに失敗
