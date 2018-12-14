@@ -3,6 +3,7 @@
 #include <alc.h>
 #include <string.h>
 #include <guiddef.h>
+#include <mmreg.h>
 
 // ストリームに使用するバッファの数
 #define NUMBUFFERS 4
@@ -32,6 +33,17 @@ struct WAVEFMT {
 	unsigned long	ulChannelMask;
     GUID            guidSubFormat;
 };
+enum WAVEFILETYPE
+{
+	WF_EX  = 1,
+	WF_EXT = 2
+};
+
+struct WAVEFILEINFO {
+    WAVEFILETYPE	     wfType; // PCMなのかEXTENSIBLEなのかを区別する為の情報
+    WAVEFORMATEXTENSIBLE wfEXT;  // フォーマット情報
+};
+
 
 int main(void) {
     // OpenALを開く
@@ -56,6 +68,8 @@ int main(void) {
     RIFFHeader riffHeader;
     RIFFChunk  riffChunk;
     WAVEFMT waveFmt;
+    WAVEFILEINFO waveInfo;
+
     // ファイルを開くのに成功
     if (fp) {
         // ヘッダを読み取り
@@ -81,7 +95,14 @@ int main(void) {
                             waveFmt.usReserved,
                             waveFmt.ulChannelMask,
                             waveFmt.guidSubFormat);
+                        // 一般的なのwaveファイルか？
+                        if (waveFmt.usFormatTag == WAVE_FORMAT_PCM) {
 
+                        }
+                        // 3チャンネル以上の特別なwaveファイルか？
+                        else if (waveFmt.usFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+
+                        }
                     }
                 }
                 else {
