@@ -33,9 +33,11 @@ int main(void) {
     FILE* fp = nullptr;
     fopen_s(&fp, WAVE_FILE_NAME, "rb");
 
+    RIFFChunk riffChunk;
     // ファイルを開くのに成功
     if (fp) {
-        
+        // Read Wave file header
+		fread(&riffChunk, 1, sizeof(RIFFChunk), fp);
 
         fclose(fp);
     }
