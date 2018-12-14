@@ -41,8 +41,9 @@ enum WAVEFILETYPE
 };
 
 struct WAVEFILEINFO {
-    WAVEFILETYPE	     wfType; // PCMなのかEXTENSIBLEなのかを区別する為の情報
+    WAVEFILETYPE         wfType; // PCMなのかEXTENSIBLEなのかを区別する為の情報
     WAVEFORMATEXTENSIBLE wfEXT;  // フォーマット情報
+    unsigned long waveSize;      // waveデータの大きさ
 };
 
 
@@ -111,6 +112,9 @@ int main(void) {
                         // 次のチャンクへ移動
                         fseek(fp, riffChunk.size, SEEK_CUR);
                     }
+                }
+                else if (_strnicmp(riffChunk.tag, "data", 4) == 0) {
+                    printf("dataチャンク発見\n");
                 }
                 else {
                     // 次のチャンクへ移動
