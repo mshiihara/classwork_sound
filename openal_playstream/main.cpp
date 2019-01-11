@@ -80,6 +80,9 @@ int main(void) {
     memset(&m_WaveIDs, 0, sizeof(m_WaveIDs));
 
     int waveId;
+    unsigned long	ulDataSize = 0;
+	unsigned long	ulFrequency = 0;
+	unsigned long	ulFormat = 0;
 
     // ファイルを開くのに成功
     if (fp) {
@@ -153,6 +156,9 @@ int main(void) {
 		}
     }
 
+    ulDataSize  = m_WaveIDs[waveId]->waveSize;
+    ulFrequency = m_WaveIDs[waveId]->wfEXT.Format.nSamplesPerSec;
+    
     fclose(fp);
     // OpenALを閉じる
     alcMakeContextCurrent(nullptr);
