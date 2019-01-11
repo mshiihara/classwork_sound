@@ -10,6 +10,8 @@
 #define NUMBUFFERS 4
 #define WAVE_FILE_NAME "sample.wav"
 
+#define MAX_NUM_WAVEID 1024
+
 // RIFFチャンクを格納する為の構造体
 struct RIFFHeader {
     char          tag[4];
@@ -59,12 +61,12 @@ int main(void) {
 
     // バッファの作成
     ALuint buffers[NUMBUFFERS];
-    alGenBuffers( NUMBUFFERS, buffers);
+    alGenBuffers(NUMBUFFERS, buffers);
 
     // ソースの作成
     ALuint source;
     alGenSources(1, &source);
-    
+
     FILE* fp = nullptr;
     fopen_s(&fp, WAVE_FILE_NAME, "rb");
 
@@ -72,6 +74,8 @@ int main(void) {
     RIFFChunk  riffChunk;
     WAVEFMT waveFmt;
     WAVEFILEINFO waveInfo;
+
+    WAVEFILEINFO* m_WaveIDs[MAX_NUM_WAVEID];
 
     // ファイルを開くのに成功
     if (fp) {
@@ -130,13 +134,13 @@ int main(void) {
         else {
             printf("ヘッダがRIFFではありませんでした\n");
         }
-        fclose(fp);
     }
     // ファイルを開くことに失敗
     else {
-
+        printf("ファイルを開くことに失敗しました。\n");
     }
 
+    fclose(fp);
     // OpenALを閉じる
     alcMakeContextCurrent(nullptr);
     alcDestroyContext(context);
