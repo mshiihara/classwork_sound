@@ -166,28 +166,45 @@ int main(void) {
     // 普通のwaveファイル
     if (m_WaveIDs[waveId]->wfType == WF_EX) {
         // 1チャンネル モノラル
-        if (m_WaveIDs[waveId]->wfEXT.Format.nChannels == 1) {}
+        if (m_WaveIDs[waveId]->wfEXT.Format.nChannels == 1) {
+            // 量子化ビット数で分岐
+            switch (m_WaveIDs[waveId]->wfEXT.Format.wBitsPerSample) {
+                case 4:
+                    ulFormat = alGetEnumValue("AL_FORMAT_MONO_IMA4");
+                    break;
+                case 8:
+                    ulFormat = alGetEnumValue("AL_FORMAT_MONO8");
+                    break;
+                case 16:
+                    ulFormat = alGetEnumValue("AL_FORMAT_MONO16");
+                    break;
+            }
+        }
         // 2チャンネル ステレオ
         else if (m_WaveIDs[waveId]->wfEXT.Format.nChannels == 2) {
             // 量子化ビット数で分岐
             switch (m_WaveIDs[waveId]->wfEXT.Format.wBitsPerSample) {
-            case 4:
-                ulFormat = alGetEnumValue("AL_FORMAT_STEREO_IMA4");
-                break;
-            case 8:
-                ulFormat = alGetEnumValue("AL_FORMAT_STEREO8");
-                break;
-            case 16:
-                ulFormat = alGetEnumValue("AL_FORMAT_STEREO16");
-                break;
+                case 4:
+                    ulFormat = alGetEnumValue("AL_FORMAT_STEREO_IMA4");
+                    break;
+                case 8:
+                    ulFormat = alGetEnumValue("AL_FORMAT_STEREO8");
+                    break;
+                case 16:
+                    ulFormat = alGetEnumValue("AL_FORMAT_STEREO16");
+                    break;
             }
         }
         // 4チャンネル
         else if ((m_WaveIDs[waveId]->wfEXT.Format.nChannels == 4) 
-            && (m_WaveIDs[waveId]->wfEXT.Format.wBitsPerSample == 16)) {}
+            && (m_WaveIDs[waveId]->wfEXT.Format.wBitsPerSample == 16)) {
+            ulFormat = alGetEnumValue("AL_FORMAT_QUAD16");
+        }
     }
     // 拡張されたwaveファイル
     else if (m_WaveIDs[waveId]->wfType == WF_EXT) {
+        //todo: 後で実装する。サンプルデータも今無いし・・・
+        printf("未実装\n");
     }
 
 
