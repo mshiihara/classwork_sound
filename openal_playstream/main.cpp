@@ -83,6 +83,12 @@ int main(void) {
     unsigned long	ulDataSize = 0;
 	unsigned long	ulFrequency = 0;
 	unsigned long	ulFormat = 0;
+    unsigned long	ulBufferSize;
+    unsigned long	ulBytesWritten;
+
+    WAVEFORMATEX wfe;
+
+    void* pData = NULL;
 
     // ファイルを開くのに成功
     if (fp) {
@@ -207,6 +213,30 @@ int main(void) {
         printf("未実装\n");
     }
 
+    //WAVEFORMATEXを取得
+    memcpy(&wfe, &(m_WaveIDs[waveId]->wfEXT.Format), 
+        sizeof(WAVEFORMATEX));
+    
+    //
+    // 250mmに近いブロックアライメントの倍数をもとめる
+    //
+
+    // 1s/4 = 250mm
+    ulBufferSize = wfe.nAvgBytesPerSec >> 2;
+    // ブロックアライメントの倍数からはみ出している部分を引く
+    ulBufferSize -= (ulBufferSize % wfe.nBlockAlign);
+    
+    // バッファを確保
+    if (ulFormat != 0) {
+        pData = malloc(ulBufferSize);
+        // dataチャンクに移動
+        fseek(fp, m_WaveIDs[waveId]->waveChunkPos, SEEK_SET);
+
+        // バッファにデータを読み込み
+        for (int i = 0; i < NUMBUFFERS; i++) {
+
+        }
+    }
 
     fclose(fp);
     // OpenALを閉じる
