@@ -234,7 +234,15 @@ int main(void) {
 
         // バッファにデータを読み込み
         for (int i = 0; i < NUMBUFFERS; i++) {
-
+            //
+            // 読み込もうと考えているサイズがファイルに残っているか？
+            //
+            unsigned long ulOffset = ftell(fp);
+            if ((ulOffset - m_WaveIDs[waveId]->waveChunkPos + ulDataSize) > m_WaveIDs[waveId]->waveSize) {
+                ulDataSize = m_WaveIDs[waveId]->waveSize - (ulOffset - m_WaveIDs[waveId]->waveChunkPos);
+            }
+            // ファイルからデータを読み取り
+            ulBytesWritten = (unsigned long)fread(pData, 1, ulDataSize, fp);
         }
     }
 
