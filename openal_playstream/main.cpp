@@ -76,6 +76,10 @@ int main(void) {
     WAVEFILEINFO waveInfo;
 
     WAVEFILEINFO* m_WaveIDs[MAX_NUM_WAVEID];
+    // 中身をゼロで初期化
+    memset(&m_WaveIDs, 0, sizeof(m_WaveIDs));
+
+    int waveId;
 
     // ファイルを開くのに成功
     if (fp) {
@@ -138,6 +142,15 @@ int main(void) {
     // ファイルを開くことに失敗
     else {
         printf("ファイルを開くことに失敗しました。\n");
+    }
+
+    long lLoop = 0;
+    for (lLoop = 0; lLoop < MAX_NUM_WAVEID; lLoop++) {
+        if (!m_WaveIDs[lLoop]){
+		    m_WaveIDs[lLoop] = &waveInfo;
+		    waveId = lLoop;
+		    break;
+		}
     }
 
     fclose(fp);
