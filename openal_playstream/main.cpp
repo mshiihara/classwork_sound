@@ -159,6 +159,25 @@ int main(void) {
     ulDataSize  = m_WaveIDs[waveId]->waveSize;
     ulFrequency = m_WaveIDs[waveId]->wfEXT.Format.nSamplesPerSec;
     
+    //
+    // フォーマットを取得
+    //
+    
+    // 普通のwaveファイル
+    if (m_WaveIDs[waveId]->wfType == WF_EX) {
+        // 1チャンネル モノラル
+        if (m_WaveIDs[waveId]->wfEXT.Format.nChannels == 1) {}
+        // 2チャンネル ステレオ
+        else if (m_WaveIDs[waveId]->wfEXT.Format.nChannels == 2) {}
+        // 4チャンネル
+        else if ((m_WaveIDs[waveId]->wfEXT.Format.nChannels == 4) 
+            && (m_WaveIDs[waveId]->wfEXT.Format.wBitsPerSample == 16)) {}
+    }
+    // 拡張されたwaveファイル
+    else if (m_WaveIDs[waveId]->wfType == WF_EXT) {
+    }
+
+
     fclose(fp);
     // OpenALを閉じる
     alcMakeContextCurrent(nullptr);
