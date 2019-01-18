@@ -90,6 +90,10 @@ int main(void) {
 
     void* pData = NULL;
 
+    ALint iBuffersProcessed;
+    ALint iTotalBuffersProcessed;
+    ALint iQueuedBuffers;
+
     // ファイルを開くのに成功
     if (fp) {
         // ヘッダを読み取り
@@ -249,7 +253,15 @@ int main(void) {
     }
 
     alSourcePlay(source);
-    getchar();
+
+    while (1) {
+        // ESCで処理終了
+        if (GetAsyncKeyState(VK_ESCAPE)) { break; }
+        // 再生済みのバッファ数を求める
+        iBuffersProcessed = 0;
+	    alGetSourcei(source, AL_BUFFERS_PROCESSED, &iBuffersProcessed);
+        printf("%d\n", iBuffersProcessed);
+    }
     fclose(fp);
     // OpenALを閉じる
     alcMakeContextCurrent(nullptr);
