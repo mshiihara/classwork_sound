@@ -238,14 +238,18 @@ int main(void) {
             // 読み込もうと考えているサイズがファイルに残っているか？
             //
             unsigned long ulOffset = ftell(fp);
-            if ((ulOffset - m_WaveIDs[waveId]->waveChunkPos + ulDataSize) > m_WaveIDs[waveId]->waveSize) {
-                ulDataSize = m_WaveIDs[waveId]->waveSize - (ulOffset - m_WaveIDs[waveId]->waveChunkPos);
+            if ((ulOffset - m_WaveIDs[waveId]->waveChunkPos + ulBufferSize) > m_WaveIDs[waveId]->waveSize) {
+                ulBufferSize = m_WaveIDs[waveId]->waveSize - (ulOffset - m_WaveIDs[waveId]->waveChunkPos);
             }
-            // ファイルからデータを読み取り
-            ulBytesWritten = (unsigned long)fread(pData, 1, ulDataSize, fp);
+            // ファイルからデータを読み取り 
+            ulBytesWritten = (unsigned long)fread(pData, 1, ulBufferSize, fp);
+            alBufferData(buffers[i], ulFormat, pData, ulBytesWritten, ulFrequency);
+			alSourceQueueBuffers(source, 1, &buffers[i]);
         }
     }
 
+    alSourcePlay(source);
+    getchar();
     fclose(fp);
     // OpenALを閉じる
     alcMakeContextCurrent(nullptr);
