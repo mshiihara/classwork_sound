@@ -49,16 +49,7 @@ struct WAVEFILEINFO {
     unsigned long waveChunkPos;  // waveチャンクのファイルポインタ
 };
 
-
-int main(void) {
-    // OpenALを開く
-    ALCdevice* device = alcOpenDevice(nullptr);
-    ALCcontext* context = nullptr;
-    if (device) {
-        context = alcCreateContext(device, nullptr);
-        alcMakeContextCurrent(context);
-    }
-
+void play() {
     // バッファの作成
     ALuint buffers[NUMBUFFERS];
     alGenBuffers(NUMBUFFERS, buffers);
@@ -95,7 +86,7 @@ int main(void) {
     ALint iBuffersProcessed;
     ALint iTotalBuffersProcessed;
     ALint iQueuedBuffers;
-    ALint iState;
+    
 
     // ファイルを開くのに成功
     if (fp) {
@@ -286,6 +277,7 @@ int main(void) {
             iBuffersProcessed--;
         }
         // 現在の状態を取得
+        ALint iState;
         alGetSourcei(source, AL_SOURCE_STATE, &iState);
         // 再生していなければ処理を終了
         if (iState != AL_PLAYING) {
@@ -293,10 +285,38 @@ int main(void) {
         }
     }
     fclose(fp);
-    // OpenALを閉じる
-    alcMakeContextCurrent(nullptr);
-    alcDestroyContext(context);
-    alcCloseDevice(device);
+}
+
+class OpenAL {
+    ALCdevice* device;
+    ALCcontext* context;
+public:
+    void init() {
+        // OpenALを開く
+        device = alcOpenDevice(nullptr);
+        context = nullptr;
+        if (device) {
+            context = alcCreateContext(device, nullptr);
+            alcMakeContextCurrent(context);
+        }
+    }
+
+    void clear() {
+        // OpenALを閉じる
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(context);
+        alcCloseDevice(device);
+    }
+};
+
+int main(void) {
+    OpenAL openAL;
+    // OpenAL初期化
+    openAL.init();
+    // 再生
+    play();
+    // OpenAL終了
+    openAL.clear();
 
     return 0;
 }
