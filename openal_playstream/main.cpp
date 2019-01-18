@@ -67,6 +67,8 @@ int main(void) {
     ALuint source;
     alGenSources(1, &source);
 
+    ALuint uiBuffer;
+
     FILE* fp = nullptr;
     fopen_s(&fp, WAVE_FILE_NAME, "rb");
 
@@ -260,7 +262,28 @@ int main(void) {
         // 再生済みのバッファ数を求める
         iBuffersProcessed = 0;
 	    alGetSourcei(source, AL_BUFFERS_PROCESSED, &iBuffersProcessed);
-        printf("%d\n", iBuffersProcessed);
+        // 再生済みのバッファがあった
+        while (iBuffersProcessed) {
+            // キューから使用済みのバッファを１つ取り出す（削除）
+            // uiBufferniには削除されたバッファの名前（識別する為の値)が格納される
+            uiBuffer = 0;
+			alSourceUnqueueBuffers(source, 1, &uiBuffer);
+
+
+            //
+            // 読み込もうと考えているサイズがファイルに残っているか？
+            //
+            unsigned long ulOffset = ftell(fp);
+            if ((ulOffset - m_WaveIDs[waveId]->waveChunkPos + ulBufferSize) > m_WaveIDs[waveId]->waveSize) {
+                ulBufferSize = m_WaveIDs[waveId]->waveSize - (ulOffset - m_WaveIDs[waveId]->waveChunkPos);
+            }
+            // ファイルからデータを読み取り 
+            ulBytesWritten = (unsigned long)fread(pData, 1, ulBufferSize, fp);
+            alBufferData(uiBuffer, ulFormat, pData, ulBytesWritten, ulFrequency);
+			alSourceQueueBuffers(source, 1, &uiBuffer);
+            // 使用済みバッファの数を一つ減らす
+            iBuffersProcessed--;
+        }
     }
     fclose(fp);
     // OpenALを閉じる
