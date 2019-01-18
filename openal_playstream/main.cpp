@@ -95,6 +95,7 @@ int main(void) {
     ALint iBuffersProcessed;
     ALint iTotalBuffersProcessed;
     ALint iQueuedBuffers;
+    ALint iState;
 
     // ファイルを開くのに成功
     if (fp) {
@@ -283,6 +284,12 @@ int main(void) {
 			alSourceQueueBuffers(source, 1, &uiBuffer);
             // 使用済みバッファの数を一つ減らす
             iBuffersProcessed--;
+        }
+        // 現在の状態を取得
+        alGetSourcei(source, AL_SOURCE_STATE, &iState);
+        // 再生していなければ処理を終了
+        if (iState != AL_PLAYING) {
+            break;
         }
     }
     fclose(fp);
