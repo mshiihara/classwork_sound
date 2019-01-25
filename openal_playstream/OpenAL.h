@@ -56,8 +56,8 @@ class OpenAL {
     ALCcontext* context;
 public:
     void init();
-    
     void play(const char* filename);
-
     void clear();
+private:
+    bool checkRIFFHeader(FILE* fp);
 };

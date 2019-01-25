@@ -21,10 +21,6 @@ void OpenAL::play(const char* filename) {
 
     ALuint uiBuffer;
 
-    FILE* fp = nullptr;
-    fopen_s(&fp, filename, "rb");
-
-    RIFFHeader riffHeader;
     RIFFChunk  riffChunk;
     WAVEFMT waveFmt;
     WAVEFILEINFO waveInfo;
@@ -50,11 +46,11 @@ void OpenAL::play(const char* filename) {
     
 
     // ファイルを開くのに成功
+    FILE* fp = nullptr;
+    fopen_s(&fp, filename, "rb");
     if (fp) {
-        // ヘッダを読み取り
-        fread(&riffHeader, 1, sizeof(RIFFHeader), fp);
-        // 読み取ったヘッダがRIFFであるか確認
-        if (_strnicmp(riffHeader.tag, "RIFF", 4) == 0) {
+        //RIFFファイルかチェック
+        if (checkRIFFHeader(fp)) {        
             printf("RIFFヘッダを読み取りました\n");
             while (fread(&riffChunk, 1, sizeof(RIFFChunk), fp) == sizeof(RIFFChunk)) {
                 // 読み取ったチャンクがfmt であるか確認
@@ -246,6 +242,21 @@ void OpenAL::play(const char* filename) {
         }
     }
     fclose(fp);
+}
+
+//
+// 引数のファイルポインタからRIFFヘッダを読み込み
+// 正常であればtrueを返す関数
+//
+bool OpenAL::checkRIFFHeader(FILE* fp) {
+    // ヘッダを読み取り
+    RIFFHeader riffHeader;
+    fread(&riffHeader, 1, sizeof(RIFFHeader), fp);
+    // 読み取ったヘッダがRIFFであるか確認
+    if (_strnicmp(riffHeader.tag, "RIFF", 4) == 0) {
+        return true;
+    }
+    return false;
 }
 
 void OpenAL::clear() {
