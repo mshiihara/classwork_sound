@@ -21,10 +21,6 @@ void OpenAL::play(const char* filename) {
 
     ALuint uiBuffer;
 
-    RIFFChunk  riffChunk;
-    WAVEFMT waveFmt;
-    WAVEFILEINFO waveInfo;
-
     WAVEFILEINFO* m_WaveIDs[MAX_NUM_WAVEID];
     // 中身をゼロで初期化
     memset(&m_WaveIDs, 0, sizeof(m_WaveIDs));
@@ -45,18 +41,10 @@ void OpenAL::play(const char* filename) {
     // waveファイルを開く
     waveFile.open("sample.wav");
 
-    // ヘッダ情報を読み込み
-    if (fp) { 
-        readHeader(fp, &waveFmt, &waveInfo); 
-    }
-    else {
-        printf("ファイルを開くことに失敗しました。\n");
-    }
-
     long lLoop = 0;
     for (lLoop = 0; lLoop < MAX_NUM_WAVEID; lLoop++) {
         if (!m_WaveIDs[lLoop]){
-		    m_WaveIDs[lLoop] = &waveInfo;
+		    m_WaveIDs[lLoop] = &waveFile.waveInfo;
 		    waveId = lLoop;
 		    break;
 	    }
@@ -128,12 +116,12 @@ void OpenAL::play(const char* filename) {
     if (ulFormat != 0) {
         pData = malloc(ulBufferSize);
         // dataチャンクに移動
-        fseek(fp, m_WaveIDs[waveId]->waveChunkPos, SEEK_SET);
+        fseek(waveFile.fp, m_WaveIDs[waveId]->waveChunkPos, SEEK_SET);
 
         // バッファにデータを読み込み
         for (int i = 0; i < NUMBUFFERS; i++) {
             // ファイルからデータを読み取り 
-            long len = readWaveFile(fp, *m_WaveIDs[waveId], pData, ulBufferSize);
+            long len = waveFile.read(pData, ulBufferSize);
             alBufferData(buffers[i], ulFormat, pData, len, ulFrequency);
 		    alSourceQueueBuffers(source, 1, &buffers[i]);
         }
@@ -155,7 +143,7 @@ void OpenAL::play(const char* filename) {
 		    alSourceUnqueueBuffers(source, 1, &uiBuffer);
 
             // ファイルからデータを読み取り 
-            long len = readWaveFile(fp, *m_WaveIDs[waveId], pData, ulBufferSize);
+            long len = waveFile.read(pData, ulBufferSize);
             alBufferData(uiBuffer, ulFormat, pData, len, ulFrequency);
 		    alSourceQueueBuffers(source, 1, &uiBuffer);
             // 使用済みバッファの数を一つ減らす
@@ -169,7 +157,6 @@ void OpenAL::play(const char* filename) {
             break;
         }
     }
-    fclose(fp);
 }
 
 //

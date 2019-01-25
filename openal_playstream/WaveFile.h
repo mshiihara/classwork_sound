@@ -1,7 +1,8 @@
 #pragma once
-
+#include <Windows.h>
 #include <stdio.h>
 #include <guiddef.h>
+#include <mmreg.h>
 // RIFFƒ`ƒƒƒ“ƒN‚ğŠi”[‚·‚éˆ×‚Ì\‘¢‘Ì
 struct RIFFHeader {
     char          tag[4];
@@ -42,8 +43,8 @@ struct WAVEFILEINFO {
 class WaveFile {
 public:
     FILE* fp;
-    WAVEFMT* waveFmt;
-    WAVEFILEINFO* waveInfo;
+    WAVEFMT waveFmt;
+    WAVEFILEINFO waveInfo;
 
     void open(const char* filename);
     long read(void* pData, int bufferSize);

@@ -1,10 +1,10 @@
 #pragma once
-#include <Windows.h>
+
 #include <al.h>
 #include <alc.h>
 #include <string.h>
 
-#include <mmreg.h>
+
 #include "WaveFile.h"
 
 // ストリームに使用するバッファの数
