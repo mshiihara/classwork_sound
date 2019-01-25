@@ -20,10 +20,4 @@ public:
     void init();
     void play(const char* filename);
     void clear();
-private:
-    bool checkRIFFHeader(FILE* fp);
-    void readHeader(FILE* fp, WAVEFMT* waveFmt, WAVEFILEINFO* waveInfo);
-    void readFMT_(FILE* fp, RIFFChunk& riffChunk, WAVEFMT* waveFmt,
-        WAVEFILEINFO* waveInfo);
-    long readWaveFile(FILE* fp, WAVEFILEINFO& waveInfo, void* pData, int bufferSize);
 };
