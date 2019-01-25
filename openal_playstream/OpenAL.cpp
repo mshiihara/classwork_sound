@@ -30,11 +30,9 @@ void OpenAL::play(const char* filename) {
     memset(&m_WaveIDs, 0, sizeof(m_WaveIDs));
 
     int waveId;
-    unsigned long	ulDataSize = 0;
     unsigned long	ulFrequency = 0;
     unsigned long	ulFormat = 0;
     unsigned long	ulBufferSize;
-    unsigned long	ulBytesWritten;
 
     WAVEFORMATEX wfe;
 
@@ -44,37 +42,14 @@ void OpenAL::play(const char* filename) {
     ALint iTotalBuffersProcessed;
     ALint iQueuedBuffers;
     
-
-    // ファイルを開くのに成功
+    // ファイルを開く
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
-    if (fp) {
-        //RIFFファイルかチェック
-        if (checkRIFFHeader(fp)) {        
-            printf("RIFFヘッダを読み取りました\n");
-            while (fread(&riffChunk, 1, sizeof(RIFFChunk), fp) == sizeof(RIFFChunk)) {
-                // 読み取ったチャンクがfmt であるか確認
-                if (_strnicmp(riffChunk.tag, "fmt ", 4) == 0) {
-                    readFMT_(fp, riffChunk, &waveFmt, &waveInfo);
-                }
-                else if (_strnicmp(riffChunk.tag, "data", 4) == 0) {
-                    printf("dataチャンク発見\n");
-                    //waveデータのサイズを取得
-                    waveInfo.waveSize = riffChunk.size;
-                    //後でwaveデータを読み込む際のセーブポイント
-                    waveInfo.waveChunkPos = ftell(fp);
-                }
-                else {
-                    // 次のチャンクへ移動
-                    fseek(fp, riffChunk.size, SEEK_CUR);
-                }
-            }
-        }
-        else {
-            printf("ヘッダがRIFFではありませんでした\n");
-        }
+
+    // ヘッダ情報を読み込み
+    if (fp) { 
+        readHeader(fp, &waveFmt, &waveInfo); 
     }
-    // ファイルを開くことに失敗
     else {
         printf("ファイルを開くことに失敗しました。\n");
     }
@@ -87,8 +62,6 @@ void OpenAL::play(const char* filename) {
 		    break;
 	    }
     }
-
-    ulDataSize  = m_WaveIDs[waveId]->waveSize;
     ulFrequency = m_WaveIDs[waveId]->wfEXT.Format.nSamplesPerSec;
     
     //
@@ -160,16 +133,9 @@ void OpenAL::play(const char* filename) {
 
         // バッファにデータを読み込み
         for (int i = 0; i < NUMBUFFERS; i++) {
-            //
-            // 読み込もうと考えているサイズがファイルに残っているか？
-            //
-            unsigned long ulOffset = ftell(fp);
-            if ((ulOffset - m_WaveIDs[waveId]->waveChunkPos + ulBufferSize) > m_WaveIDs[waveId]->waveSize) {
-                ulBufferSize = m_WaveIDs[waveId]->waveSize - (ulOffset - m_WaveIDs[waveId]->waveChunkPos);
-            }
             // ファイルからデータを読み取り 
-            ulBytesWritten = (unsigned long)fread(pData, 1, ulBufferSize, fp);
-            alBufferData(buffers[i], ulFormat, pData, ulBytesWritten, ulFrequency);
+            long len = readWaveFile(fp, *m_WaveIDs[waveId], pData, ulBufferSize);
+            alBufferData(buffers[i], ulFormat, pData, len, ulFrequency);
 		    alSourceQueueBuffers(source, 1, &buffers[i]);
         }
     }
@@ -189,17 +155,9 @@ void OpenAL::play(const char* filename) {
             uiBuffer = 0;
 		    alSourceUnqueueBuffers(source, 1, &uiBuffer);
 
-
-            //
-            // 読み込もうと考えているサイズがファイルに残っているか？
-            //
-            unsigned long ulOffset = ftell(fp);
-            if ((ulOffset - m_WaveIDs[waveId]->waveChunkPos + ulBufferSize) > m_WaveIDs[waveId]->waveSize) {
-                ulBufferSize = m_WaveIDs[waveId]->waveSize - (ulOffset - m_WaveIDs[waveId]->waveChunkPos);
-            }
             // ファイルからデータを読み取り 
-            ulBytesWritten = (unsigned long)fread(pData, 1, ulBufferSize, fp);
-            alBufferData(uiBuffer, ulFormat, pData, ulBytesWritten, ulFrequency);
+            long len = readWaveFile(fp, *m_WaveIDs[waveId], pData, ulBufferSize);
+            alBufferData(uiBuffer, ulFormat, pData, len, ulFrequency);
 		    alSourceQueueBuffers(source, 1, &uiBuffer);
             // 使用済みバッファの数を一つ減らす
             iBuffersProcessed--;
@@ -228,6 +186,34 @@ bool OpenAL::checkRIFFHeader(FILE* fp) {
         return true;
     }
     return false;
+}
+
+void OpenAL::readHeader(FILE* fp, WAVEFMT* waveFmt, WAVEFILEINFO* waveInfo) {
+    //RIFFファイルかチェック
+    if (checkRIFFHeader(fp)) {        
+        printf("RIFFヘッダを読み取りました\n");
+        RIFFChunk riffChunk;
+        while (fread(&riffChunk, 1, sizeof(RIFFChunk), fp) == sizeof(RIFFChunk)) {
+            // 読み取ったチャンクがfmt であるか確認
+            if (_strnicmp(riffChunk.tag, "fmt ", 4) == 0) {
+                readFMT_(fp, riffChunk, waveFmt, waveInfo);
+            }
+            else if (_strnicmp(riffChunk.tag, "data", 4) == 0) {
+                printf("dataチャンク発見\n");
+                //waveデータのサイズを取得
+                waveInfo->waveSize = riffChunk.size;
+                //後でwaveデータを読み込む際のセーブポイント
+                waveInfo->waveChunkPos = ftell(fp);
+            }
+            else {
+                // 次のチャンクへ移動
+                fseek(fp, riffChunk.size, SEEK_CUR);
+            }
+        }
+    }
+    else {
+        printf("ヘッダがRIFFではありませんでした\n");
+    }
 }
 
 //
@@ -265,6 +251,18 @@ void OpenAL::readFMT_(FILE* fp, RIFFChunk& riffChunk,WAVEFMT* waveFmt,
         // 次のチャンクへ移動
         fseek(fp, riffChunk.size, SEEK_CUR);
     }
+}
+
+long OpenAL::readWaveFile(FILE * fp, WAVEFILEINFO& waveInfo, void* pData, int bufferSize) {
+    //
+    // 読み込もうと考えているサイズがファイルに残っているか？
+    //
+    unsigned long ulOffset = ftell(fp);
+    if ((ulOffset - waveInfo.waveChunkPos + bufferSize) > waveInfo.waveSize) {
+        bufferSize = waveInfo.waveSize - (ulOffset - waveInfo.waveChunkPos);
+    }
+    // ファイルからデータを読み取り 
+    return fread(pData, 1, bufferSize, fp);
 }
 
 void OpenAL::clear() {
