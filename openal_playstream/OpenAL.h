@@ -49,8 +49,6 @@ struct WAVEFILEINFO {
     unsigned long waveChunkPos;  // waveチャンクのファイルポインタ
 };
 
-
-
 class OpenAL {
     ALCdevice* device;
     ALCcontext* context;
