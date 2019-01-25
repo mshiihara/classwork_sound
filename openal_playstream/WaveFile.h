@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdio.h>
-
+#include <guiddef.h>
 // RIFFƒ`ƒƒƒ“ƒN‚ğŠi”[‚·‚éˆ×‚Ì\‘¢‘Ì
 struct RIFFHeader {
     char          tag[4];
@@ -50,5 +50,5 @@ public:
 private:
     bool checkRIFFHeader();
     void readHeader();
-    readFMT_(RIFFChunk& riffChunk);
+    void readFMT_(RIFFChunk& riffChunk);
 };

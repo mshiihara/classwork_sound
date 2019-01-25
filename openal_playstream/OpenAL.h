@@ -3,7 +3,7 @@
 #include <al.h>
 #include <alc.h>
 #include <string.h>
-#include <guiddef.h>
+
 #include <mmreg.h>
 #include "WaveFile.h"
 
@@ -15,6 +15,7 @@
 class OpenAL {
     ALCdevice* device;
     ALCcontext* context;
+    WaveFile waveFile;
 public:
     void init();
     void play(const char* filename);

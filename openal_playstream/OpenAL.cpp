@@ -42,9 +42,8 @@ void OpenAL::play(const char* filename) {
     ALint iTotalBuffersProcessed;
     ALint iQueuedBuffers;
     
-    // ファイルを開く
-    FILE* fp = nullptr;
-    fopen_s(&fp, filename, "rb");
+    // waveファイルを開く
+    waveFile.open("sample.wav");
 
     // ヘッダ情報を読み込み
     if (fp) { 
