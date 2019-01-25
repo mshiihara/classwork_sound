@@ -9,7 +9,6 @@
 
 // ストリームに使用するバッファの数
 #define NUMBUFFERS 4
-#define WAVE_FILE_NAME "sample.wav"
 
 #define MAX_NUM_WAVEID 1024
 
@@ -58,7 +57,7 @@ class OpenAL {
 public:
     void init();
     
-    void play();
+    void play(const char* filename);
 
     void clear();
 };

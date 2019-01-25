@@ -10,7 +10,7 @@ void OpenAL::init()  {
     }
 }
 
-void OpenAL::play() {
+void OpenAL::play(const char* filename) {
     // バッファの作成
     ALuint buffers[NUMBUFFERS];
     alGenBuffers(NUMBUFFERS, buffers);
@@ -22,7 +22,7 @@ void OpenAL::play() {
     ALuint uiBuffer;
 
     FILE* fp = nullptr;
-    fopen_s(&fp, WAVE_FILE_NAME, "rb");
+    fopen_s(&fp, filename, "rb");
 
     RIFFHeader riffHeader;
     RIFFChunk  riffChunk;
