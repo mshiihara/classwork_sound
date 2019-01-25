@@ -60,4 +60,6 @@ public:
     void clear();
 private:
     bool checkRIFFHeader(FILE* fp);
+    void readFMT_(FILE* fp, RIFFChunk& riffChunk, WAVEFMT* waveFmt,
+        WAVEFILEINFO* waveInfo);
 };

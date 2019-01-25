@@ -55,36 +55,7 @@ void OpenAL::play(const char* filename) {
             while (fread(&riffChunk, 1, sizeof(RIFFChunk), fp) == sizeof(RIFFChunk)) {
                 // 読み取ったチャンクがfmt であるか確認
                 if (_strnicmp(riffChunk.tag, "fmt ", 4) == 0) {
-                    printf("fmt チャンクを発見\n");
-                    if (riffChunk.size <= sizeof(WAVEFMT)) {
-                        //フォーマット情報を読み取り
-                        fread(&waveFmt, 1, riffChunk.size, fp);
-                        printf("usFormatTag:%d\nusChannels:%d\nulSamplesPerSec:%d\nulAvgBytesPerSec:%d\nusBlockAlign:%d\nusBitsPerSample:%d\nusSize:%d\nusReserved:%d\nulChannelMask:%d\nguidSubFormat:%d\n",
-                            waveFmt.usFormatTag,
-                            waveFmt.usChannels,
-                            waveFmt.ulSamplesPerSec,
-                            waveFmt.ulAvgBytesPerSec,
-                            waveFmt.usBlockAlign,
-                            waveFmt.usBitsPerSample,
-                            waveFmt.usSize,
-                            waveFmt.usReserved,
-                            waveFmt.ulChannelMask,
-                            waveFmt.guidSubFormat);
-                        // 一般的なのwaveファイルか？
-                        if (waveFmt.usFormatTag == WAVE_FORMAT_PCM) {
-                            waveInfo.wfType = WF_EX;
-                            memcpy(&waveInfo.wfEXT.Format, &waveFmt, sizeof(PCMWAVEFORMAT));
-                        }
-                        // 3チャンネル以上の特別なwaveファイルか？
-                        else if (waveFmt.usFormatTag == WAVE_FORMAT_EXTENSIBLE) {
-                            waveInfo.wfType = WF_EXT;
-                            memcpy(&waveInfo.wfEXT, &waveFmt, sizeof(WAVEFORMATEXTENSIBLE));
-                        }
-                    }
-                    else {
-                        // 次のチャンクへ移動
-                        fseek(fp, riffChunk.size, SEEK_CUR);
-                    }
+                    readFMT_(fp, &waveFmt, &waveInfo);
                 }
                 else if (_strnicmp(riffChunk.tag, "data", 4) == 0) {
                     printf("dataチャンク発見\n");
@@ -257,6 +228,43 @@ bool OpenAL::checkRIFFHeader(FILE* fp) {
         return true;
     }
     return false;
+}
+
+//
+// fmt チャンクを読み取る為の関数
+//
+void OpenAL::readFMT_(FILE* fp, RIFFChunk& riffChunk,WAVEFMT* waveFmt, 
+    WAVEFILEINFO* waveInfo) {
+    printf("fmt チャンクを発見\n");
+                    if (riffChunk.size <= sizeof(WAVEFMT)) {
+                        //フォーマット情報を読み取り
+                        fread(&waveFmt, 1, riffChunk.size, fp);
+                        printf("usFormatTag:%d\nusChannels:%d\nulSamplesPerSec:%d\nulAvgBytesPerSec:%d\nusBlockAlign:%d\nusBitsPerSample:%d\nusSize:%d\nusReserved:%d\nulChannelMask:%d\nguidSubFormat:%d\n",
+                            waveFmt.usFormatTag,
+                            waveFmt.usChannels,
+                            waveFmt.ulSamplesPerSec,
+                            waveFmt.ulAvgBytesPerSec,
+                            waveFmt.usBlockAlign,
+                            waveFmt.usBitsPerSample,
+                            waveFmt.usSize,
+                            waveFmt.usReserved,
+                            waveFmt.ulChannelMask,
+                            waveFmt.guidSubFormat);
+                        // 一般的なのwaveファイルか？
+                        if (waveFmt.usFormatTag == WAVE_FORMAT_PCM) {
+                            waveInfo.wfType = WF_EX;
+                            memcpy(&waveInfo.wfEXT.Format, &waveFmt, sizeof(PCMWAVEFORMAT));
+                        }
+                        // 3チャンネル以上の特別なwaveファイルか？
+                        else if (waveFmt.usFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+                            waveInfo.wfType = WF_EXT;
+                            memcpy(&waveInfo.wfEXT, &waveFmt, sizeof(WAVEFORMATEXTENSIBLE));
+                        }
+                    }
+                    else {
+                        // 次のチャンクへ移動
+                        fseek(fp, riffChunk.size, SEEK_CUR);
+                    }
 }
 
 void OpenAL::clear() {
