@@ -6,6 +6,7 @@
 #include <string.h>
 #include <guiddef.h>
 #include <mmreg.h>
+#include "WaveFile.h"
 
 // ストリームに使用するバッファの数
 #define NUMBUFFERS 4
